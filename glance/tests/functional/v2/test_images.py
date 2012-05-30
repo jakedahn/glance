@@ -73,7 +73,6 @@ class TestImages(functional.FunctionalTest):
         self.assertEqual(200, response.status_code)
 
         path = self._url('/images?name=image-1')
-        response = requests.get(path, headers=self._headers())
         self.assertEqual(200, response.status_code)
         images = json.loads(response.text)['images']
         #from nose.tools import set_trace; set_trace()

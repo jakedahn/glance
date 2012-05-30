@@ -34,9 +34,9 @@ USER2 = '0b3b3006-cb76-4517-ae32-51397e22c754'
 
 
 class FakeRequest(wsgi.Request):
-    def __init__(self):
+    def __init__(self, qs=''):
         #TODO(bcwaldon): figure out how to fake this out cleanly
-        super(FakeRequest, self).__init__({'REQUEST_METHOD': 'POST'})
+        super(FakeRequest, self).__init__({'REQUEST_METHOD': 'POST', 'QUERY_STRING': qs})
 
         kwargs = {
             'user': USER1,
