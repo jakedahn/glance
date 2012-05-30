@@ -51,6 +51,35 @@ class TestImages(functional.FunctionalTest):
         base_headers.update(custom_headers or {})
         return base_headers
 
+    def test_image_filtering(self):
+        """docstring for test_image_filtering"""
+        # Create 3 images
+        path = self._url('/images')
+        headers = self._headers({'content-type': 'application/json'})
+        data = json.dumps({'name': 'image-1', 'type': 'kernel', 'foo': 'bar'})
+        response = requests.post(path, headers=headers, data=data)
+        self.assertEqual(200, response.status_code)
+
+        path = self._url('/images')
+        headers = self._headers({'content-type': 'application/json'})
+        data = json.dumps({'name': 'image-2', 'type': 'kernel', 'foo': 'bar'})
+        response = requests.post(path, headers=headers, data=data)
+        self.assertEqual(200, response.status_code)
+
+        path = self._url('/images')
+        headers = self._headers({'content-type': 'application/json'})
+        data = json.dumps({'name': 'image-3', 'type': 'kernel', 'foo': 'bar'})
+        response = requests.post(path, headers=headers, data=data)
+        self.assertEqual(200, response.status_code)
+
+        path = self._url('/images?name=image-1')
+        response = requests.get(path, headers=self._headers())
+        self.assertEqual(200, response.status_code)
+        images = json.loads(response.text)['images']
+        #from nose.tools import set_trace; set_trace()
+        self.assertEqual(1, len(images))
+
+
     def test_image_lifecycle(self):
         # Image list should be empty
         path = self._url('/images')
