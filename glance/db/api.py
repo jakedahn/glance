@@ -386,6 +386,9 @@ def image_get_all(context, filters=None, marker=None, limit=None,
     query = session.query(models.Image).\
                     options(joinedload(models.Image.properties)).\
                     options(joinedload(models.Image.members))
+    if 'name' in filters:
+        query = query.filter(models.Image.name == filters['name'])
+        del filters['name']
 
     if 'size_min' in filters:
         query = query.filter(models.Image.size >= filters['size_min'])

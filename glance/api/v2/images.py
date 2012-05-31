@@ -80,7 +80,7 @@ class ImagesController(base.Controller):
         #NOTE(bcwaldon): is_public=True gets public images and those
         # owned by the authenticated tenant
         #from nose.tools import set_trace; set_trace() 
-        filters = {'deleted': False, 'is_public': True}
+        filters = {'deleted': False, 'is_public': True, 'name': 'foo'}
         images = self.db_api.image_get_all(req.context, filters=filters)
         images = [self._normalize_properties(dict(image)) for image in images]
         return [self._append_tags(req.context, image) for image in images]

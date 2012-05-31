@@ -25,6 +25,7 @@ LOG = logging.getLogger(__name__)
 
 UUID1 = 'c80a1a6c-bd1f-41c5-90ee-81afedb1d58d'
 UUID2 = '971ec09a-8067-4bc8-a91f-ae3557f1c4c7'
+UUID3 = 'c4bae2ce-57c8-4e28-86cc-bf25f25d25af'
 
 TENANT1 = '6838eb7b-6ded-434a-882c-b344c77fe8df'
 TENANT2 = '2c014f32-55eb-467d-8fcb-4bd706012f81'
@@ -36,7 +37,8 @@ USER2 = '0b3b3006-cb76-4517-ae32-51397e22c754'
 class FakeRequest(wsgi.Request):
     def __init__(self, qs=''):
         #TODO(bcwaldon): figure out how to fake this out cleanly
-        super(FakeRequest, self).__init__({'REQUEST_METHOD': 'POST', 'QUERY_STRING': qs})
+        super(FakeRequest, self).__init__({'REQUEST_METHOD': 'POST',
+                                           'QUERY_STRING': qs})
 
         kwargs = {
             'user': USER1,
@@ -51,13 +53,15 @@ class FakeDB(object):
 
     def __init__(self):
         self.images = {
-            UUID1: self._image_format(UUID1, location=UUID1),
-            UUID2: self._image_format(UUID2),
+            UUID1: self._image_format(UUID1, image_name="foo", location=UUID1),
+            UUID2: self._image_format(UUID2, image_name="bar"),
+            UUID3: self._image_format(UUID3, image_name="Baz")
         }
         self.members = {
             UUID1: [
                 self._image_member_format(UUID1, TENANT1, True),
                 self._image_member_format(UUID1, TENANT2, False),
+                self._image_member_format(UUID1, TENANT2, True),
             ],
             UUID2: [],
         }
@@ -77,19 +81,21 @@ class FakeDB(object):
     def get_session(self):
         pass
 
-    def _image_member_format(self, image_id, tenant_id, can_share):
+    def _image_member_format(self, image_id, tenant_id, can_share,
+                             image_name='image-name' ):
         return {
             'image_id': image_id,
             'member': tenant_id,
             'can_share': can_share,
             'deleted': False,
+            'name': image_name,
         }
 
-    def _image_format(self, image_id, **values):
+    def _image_format(self, image_id, image_name='image-name', **values):
         dt = datetime.datetime.now()
         image = {
             'id': image_id,
-            'name': 'image-name',
+            'name': image_name,
             'owner': TENANT1,
             'location': None,
             'status': 'queued',
@@ -116,19 +122,26 @@ class FakeDB(object):
         return image
 
     def image_get_all(self, context, filters=None):
+        foo = [] 
+        filtered_images = []
+        zomg = filter(lambda f: dict(filter(lambda img: img[1][f] == v, self.images.iteritems())), filters.iteritems())
+        #for k, v in filters.iteritems():
+            #if k != "deleted":
+                #foo.append(dict(filter(lambda img: img[1]['name'] == 'foo', self.images.iteritems())))
+        from nose.tools import set_trace; set_trace()
         return self.images.values()
 
     def image_member_find(self, context, image_id, tenant_id):
         try:
             self.images[image_id]
-        except KeyError:
-            raise exception.NotFound()
+        except keyerror:
+            raise exception.notfound()
 
         for member in self.members.get(image_id, []):
             if member['member'] == tenant_id:
                 return member
 
-        raise exception.NotFound()
+        raise exception.notfound()
 
     def image_member_create(self, context, values):
         member = self._image_member_format(values['image_id'],
@@ -147,17 +160,17 @@ class FakeDB(object):
         return image
 
     def image_update(self, context, image_id, image_values):
-        LOG.info('Updating image %s with values %s' %
+        log.info('updating image %s with values %s' %
                  (image_id, str(image_values)))
         try:
             image = self.images[image_id]
-            LOG.info('Found image %s: %s' % (image_id, str(image)))
-        except KeyError:
-            raise exception.NotFound(image_id=image_id)
+            log.info('found image %s: %s' % (image_id, str(image)))
+        except keyerror:
+            raise exception.notfound(image_id=image_id)
 
         image.update(image_values)
         self.images[image_id] = image
-        LOG.info('Image %s updated to %s' % (image_id, str(image)))
+        log.info('image %s updated to %s' % (image_id, str(image)))
         return image
 
     def image_tag_get_all(self, context, image_id):
@@ -189,10 +202,10 @@ class FakeDB(object):
             raise exception.NotFound()
 
 
-class FakeStoreAPI(object):
+class fakestoreapi(object):
     def __init__(self):
         self.data = {
-            UUID1: ('XXX', 3),
+            uuid1: ('xxx', 3),
         }
 
     def create_stores(self, conf):
@@ -200,18 +213,18 @@ class FakeStoreAPI(object):
 
     def get_from_backend(self, location):
         try:
-            #NOTE(bcwaldon): This fake API is store-agnostic, so we only
+            #note(bcwaldon): this fake api is store-agnostic, so we only
             # care about location being some unique string
             return self.data[location]
-        except KeyError:
-            raise exception.NotFound()
+        except keyerror:
+            raise exception.notfound()
 
     def get_size_from_backend(self, location):
         return self.get_from_backend(location)[1]
 
     def add_to_backend(self, scheme, image_id, data, size):
         if image_id in self.data:
-            raise exception.Duplicate()
+            raise exception.duplicate()
         self.data[image_id] = (data, size or len(data))
-        checksum = 'Z'
+        checksum = 'z'
         return (image_id, size, checksum)
