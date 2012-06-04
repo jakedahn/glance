@@ -40,15 +40,14 @@ class TestImagesController(test_utils.BaseTestCase):
     def test_index(self):
         request = unit_test_utils.FakeRequest()
         output = self.controller.index(request)
-        self.assertEqual(2, len(output))
+        #from nose.tools import set_trace; set_trace()
+        self.assertEqual(3, len(output))
         self.assertEqual(output[0]['id'], unit_test_utils.UUID1)
         self.assertEqual(output[1]['id'], unit_test_utils.UUID2)
 
     def test_index_with_name_filter(self):
-        #from nose.tools import set_trace; set_trace()
-        req = unit_test_utils.FakeRequest('name=zomg')
+        req = unit_test_utils.FakeRequest('name=image-3')
         res = self.controller.index(req)
-        #from nose.tools import set_trace; set_trace()
         self.assertEqual(1, len(res))
 
     def test_index_zero_images(self):
@@ -64,7 +63,7 @@ class TestImagesController(test_utils.BaseTestCase):
             output.pop(key)
         expected = {
             'id': unit_test_utils.UUID2,
-            'name': 'image-name',
+            'name': 'image-2',
             'owner': unit_test_utils.TENANT1,
             'location': None,
             'status': 'queued',
@@ -121,12 +120,12 @@ class TestImagesController(test_utils.BaseTestCase):
 
     def test_update(self):
         request = unit_test_utils.FakeRequest()
-        image = {'name': 'image-2'}
+        image = {'name': 'image-afterupdate'}
         output = self.controller.update(request, unit_test_utils.UUID1, image)
         for key in ['id', 'created_at', 'updated_at']:
             output.pop(key)
         expected = {
-            'name': 'image-2',
+            'name': 'image-afterupdate',
             'owner': unit_test_utils.TENANT1,
             'location': unit_test_utils.UUID1,
             'status': 'queued',

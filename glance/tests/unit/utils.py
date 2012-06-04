@@ -53,9 +53,9 @@ class FakeDB(object):
 
     def __init__(self):
         self.images = {
-            UUID1: self._image_format(UUID1, image_name="foo", location=UUID1),
-            UUID2: self._image_format(UUID2, image_name="bar"),
-            UUID3: self._image_format(UUID3, image_name="Baz")
+            UUID1: self._image_format(UUID1, image_name="image-1", location=UUID1),
+            UUID2: self._image_format(UUID2, image_name="image-2"),
+            UUID3: self._image_format(UUID3, image_name="image-3")
         }
         self.members = {
             UUID1: [
@@ -64,10 +64,12 @@ class FakeDB(object):
                 self._image_member_format(UUID1, TENANT2, True),
             ],
             UUID2: [],
+            UUID3: [],
         }
         self.tags = {
             UUID1: ['ping', 'pong'],
             UUID2: [],
+            UUID3: [],
         }
 
     def reset(self):
@@ -164,17 +166,18 @@ class FakeDB(object):
         return image
 
     def image_update(self, context, image_id, image_values):
-        log.info('updating image %s with values %s' %
+        LOG.info('updating image %s with values %s' %
                  (image_id, str(image_values)))
         try:
             image = self.images[image_id]
-            log.info('found image %s: %s' % (image_id, str(image)))
-        except keyerror:
-            raise exception.notfound(image_id=image_id)
+            LOG.info('found image %s: %s' % (image_id, str(image)))
+        except KeyError:
+            raise exception.NotFound(image_id=image_id)
 
         image.update(image_values)
+        #from nose.tools import set_trace; set_trace()
         self.images[image_id] = image
-        log.info('image %s updated to %s' % (image_id, str(image)))
+        LOG.info('image %s updated to %s' % (image_id, str(image)))
         return image
 
     def image_tag_get_all(self, context, image_id):
