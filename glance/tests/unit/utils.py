@@ -130,7 +130,10 @@ class FakeDB(object):
                                       self.images.iteritems()))
                     if img:
                         filtered_imgs.append(self.images[img.keys()[0]])
-        return filtered_imgs
+        if filtered_imgs:
+            return filtered_imgs
+        else:
+            return self.images.values()
 
     def image_member_find(self, context, image_id, tenant_id):
         try:

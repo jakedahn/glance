@@ -45,7 +45,8 @@ class TestImagesController(test_utils.BaseTestCase):
         self.assertEqual(output[1]['id'], unit_test_utils.UUID2)
 
     def test_index_with_name_filter(self):
-        req = test_utils.FakeRequest('name=foo')
+        #from nose.tools import set_trace; set_trace()
+        req = unit_test_utils.FakeRequest('name=zomg')
         res = self.controller.index(req)
         #from nose.tools import set_trace; set_trace()
         self.assertEqual(1, len(res))

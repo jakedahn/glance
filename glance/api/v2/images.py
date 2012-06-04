@@ -79,7 +79,11 @@ class ImagesController(base.Controller):
     def index(self, req):
         #NOTE(bcwaldon): is_public=True gets public images and those
         # owned by the authenticated tenant
-        filters = {'deleted': False, 'is_public': True, 'name': 'foo'}
+        filters = {'deleted': False, 'is_public': True}
+        filter_params = req.str_GET.items()
+        if filter_params: 
+            for name,value in filter_params:
+                filters.update({name: value})
         images = self.db_api.image_get_all(req.context, filters=filters)
         images = [self._normalize_properties(dict(image)) for image in images]
         return [self._append_tags(req.context, image) for image in images]
