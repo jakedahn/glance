@@ -45,7 +45,7 @@ class TestImagesController(test_utils.BaseTestCase):
         self.assertEqual(output[1]['id'], unit_test_utils.UUID2)
 
     def test_index_with_name_filter(self):
-        req = unit_test_utils.FakeRequest('name=image-3')
+        req = unit_test_utils.FakeRequest('name=image-1')
         res = self.controller.index(req)
         self.assertEqual(1, len(res))
 
