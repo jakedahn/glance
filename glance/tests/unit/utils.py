@@ -54,22 +54,18 @@ class FakeDB(object):
     def __init__(self):
         self.images = {
             UUID1: self._image_format(UUID1, image_name="image-1", location=UUID1),
-            UUID2: self._image_format(UUID2, image_name="image-2"),
-            UUID3: self._image_format(UUID3, image_name="image-3")
+            UUID2: self._image_format(UUID2, image_name="image-2")
         }
         self.members = {
             UUID1: [
                 self._image_member_format(UUID1, TENANT1, True),
                 self._image_member_format(UUID1, TENANT2, False),
-                self._image_member_format(UUID1, TENANT2, True),
             ],
-            UUID2: [],
-            UUID3: [],
+            UUID2: []
         }
         self.tags = {
             UUID1: ['ping', 'pong'],
-            UUID2: [],
-            UUID3: [],
+            UUID2: []
         }
 
     def reset(self):
@@ -140,14 +136,14 @@ class FakeDB(object):
     def image_member_find(self, context, image_id, tenant_id):
         try:
             self.images[image_id]
-        except keyerror:
-            raise exception.notfound()
+        except KeyError:
+            raise exception.NotFound()
 
         for member in self.members.get(image_id, []):
             if member['member'] == tenant_id:
                 return member
 
-        raise exception.notfound()
+        raise exception.NotFound()
 
     def image_member_create(self, context, values):
         member = self._image_member_format(values['image_id'],
@@ -175,7 +171,6 @@ class FakeDB(object):
             raise exception.NotFound(image_id=image_id)
 
         image.update(image_values)
-        #from nose.tools import set_trace; set_trace()
         self.images[image_id] = image
         LOG.info('image %s updated to %s' % (image_id, str(image)))
         return image
@@ -209,10 +204,10 @@ class FakeDB(object):
             raise exception.NotFound()
 
 
-class fakestoreapi(object):
+class FakeStoreAPI(object):
     def __init__(self):
         self.data = {
-            uuid1: ('xxx', 3),
+            UUID1: ('XXX', 3),
         }
 
     def create_stores(self, conf):
@@ -223,7 +218,7 @@ class fakestoreapi(object):
             #note(bcwaldon): this fake api is store-agnostic, so we only
             # care about location being some unique string
             return self.data[location]
-        except keyerror:
+        except KeyError:
             raise exception.notfound()
 
     def get_size_from_backend(self, location):
@@ -231,7 +226,7 @@ class fakestoreapi(object):
 
     def add_to_backend(self, scheme, image_id, data, size):
         if image_id in self.data:
-            raise exception.duplicate()
+            raise exception.Duplicate()
         self.data[image_id] = (data, size or len(data))
         checksum = 'z'
         return (image_id, size, checksum)
