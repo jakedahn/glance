@@ -48,7 +48,7 @@ class TestImagesController(test_utils.BaseTestCase):
         req = test_utils.FakeRequest('name=foo')
         res = self.controller.index(req)
         #from nose.tools import set_trace; set_trace()
-        self.assertEqual(1, len(output))
+        self.assertEqual(1, len(res))
 
     def test_index_zero_images(self):
         self.db.reset()

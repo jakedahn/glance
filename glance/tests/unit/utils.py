@@ -122,14 +122,15 @@ class FakeDB(object):
         return image
 
     def image_get_all(self, context, filters=None):
-        foo = [] 
-        filtered_images = []
-        zomg = filter(lambda f: dict(filter(lambda img: img[1][f] == v, self.images.iteritems())), filters.iteritems())
-        #for k, v in filters.iteritems():
-            #if k != "deleted":
-                #foo.append(dict(filter(lambda img: img[1]['name'] == 'foo', self.images.iteritems())))
-        from nose.tools import set_trace; set_trace()
-        return self.images.values()
+        filtered_imgs = []
+        if filters:
+            for k, v in filters.iteritems():
+                if k != "deleted":
+                    img = dict(filter(lambda img: img[1][k] == v,
+                                      self.images.iteritems()))
+                    if img:
+                        filtered_imgs.append(self.images[img.keys()[0]])
+        return filtered_imgs
 
     def image_member_find(self, context, image_id, tenant_id):
         try:
